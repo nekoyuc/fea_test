@@ -1,31 +1,30 @@
 *INCLUDE, INPUT=gmsh_test_1.msh
 ** Material Properties (Replace 'a' with the actual Young's modulus value)
 *MATERIAL,NAME=TableMaterial
-*ELASTIC
-30000, 0.3  
+*ELASTIC, TYPE = ISO
+30000, 0.3
+
+** Element Set
+*ELSET,ELSET=EALL,GENERATE
+1,32
 
 ** Section
-*SHELL SECTION,ELSET=Eall,MATERIAL=TableMaterial,OFFSET=SNEG
-*NODAL THICKNESS
-gmsh_test_1.msh  # Assuming the mesh file contains thickness information
+*SOLID SECTION,MATERIAL=TableMaterial,ELSET=EALL
 
 ** Boundary Conditions
-*BOUNDARY
-leg_bottoms, 1, 3  # Fix all displacements for leg bottoms
-
-** Load
-*DLOAD
-table_top, P, -100  # Uniform downward pressure (adjust -100 as needed)
+*BOUNDARY LEG_BOTTOMS, 1, 3  # Fix all displacements for leg bottoms
 
 ** Step
-*STEP,NLGEOM=YES
+*STEP
+** Load
+*DLOAD TABLE_TOP, P1, -100  # Uniform downward pressure (adjust -100 as needed)
 *STATIC
 
 ** Output Request
-*NODE FILE, NSET=Nall
+*NODE FILE,GLOBAL=YES,ELSET=EALL
 U
 *EL FILE
-S, MISES, SEQV
+S
 
 ** End Step
 *END STEP
