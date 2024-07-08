@@ -75,10 +75,13 @@ gmsh.option.setNumber("Mesh.Algorithm", 6)  # Set algorithm to generate hexahedr
 gmsh.option.setNumber("Mesh.Algorithm3D", 1)  # Set algorithm for 3D meshing to Delaunay
 gmsh.option.setNumber("Mesh.CharacteristicLengthMin", 10)
 gmsh.option.setNumber("Mesh.CharacteristicLengthMax", 50)
-
-# Create mesh
 gmsh.option.setNumber("Mesh.SubdivisionAlgorithm", 2)
+
+gmsh.option.setNumber("Mesh.ElementOrder", 2)
+gmsh.option.setNumber("Mesh.SecondOrderIncomplete", 1)
+# Create mesh
 gmsh.model.mesh.generate(3)
+#gmsh.model.mesh.refine()
 
 print(f'Top surfaces: {TABLE_TOP}\n')
 print(f'Bottom surfaces: {LEG_BOTTOMS}\n')
