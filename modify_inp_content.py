@@ -11,21 +11,19 @@ with open(file_path, "a") as file:
     additional_contents += "*BOUNDARY, FIXED\n"
     additional_contents += "LEG_BOTTOMS,1,3\n\n"
 
-    additional_contents += "*STEP\n"
+    additional_contents += "*STEP,INC=1000,NLGEOM=YES\n"
     additional_contents += "*STATIC\n\n"
 
     additional_contents += "*DLOAD\n"
-    additional_contents += "TABLE_TOP, P1, -100\n\n"
+    additional_contents += "VOLUME, P1, -100\n\n"
     
-    '''
     additional_contents += "*NODE FILE,GLOBAL=YES, NSET=VOLUME\n"
     additional_contents += "RF,U\n\n"
-    '''
-    '''
-    additional_contents += "*EL FILE,GLOBAL=YES, ELSET=TABLE_TOP\n"
-    additional_contents += "ME\n"
-    additional_contents += "S\n\n"
-    '''
+    
+    
+    additional_contents += "*EL FILE,GLOBAL=YES, VOLUME\n"
+    additional_contents += "ME,S\n\n"
+    
     additional_contents += "*END STEP\n"
 
     file.write(additional_contents)

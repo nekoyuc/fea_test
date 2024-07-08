@@ -6,7 +6,7 @@ gmsh.option.setNumber("General.Terminal", 1)
 gmsh.model.add("My_Structure")
 
 # Load STL Mesh
-gmsh.merge('gmsh_test_2.stl')
+gmsh.merge('gmsh_test_1.stl')
 
 #####################################################
 # create mesh surfaces using facet groups of 3
@@ -59,12 +59,14 @@ volumes = gmsh.model.getEntities(3)
 # Find surfaces that are on the ground and on the top
 base_tol = 0.01
 top_tol = 0.01
-TABLE_TOP = gmsh.model.getEntitiesInBoundingBox(xmin, ymin, zmax - top_tol, xmax, ymax, zmax + top_tol, 2)
-LEG_BOTTOMS = gmsh.model.getEntitiesInBoundingBox(xmin, ymin, zmin - base_tol, xmax, ymax, zmin + base_tol, 2)
+TABLE_TOP = gmsh.model.getEntitiesInBoundingBox(xmin, ymin, zmax - top_tol, xmax, ymax, zmax + top_tol, 0)
+LEG_BOTTOMS = gmsh.model.getEntitiesInBoundingBox(xmin, ymin, zmin - base_tol, xmax, ymax, zmin + base_tol, 0)
+print('TABLE_TOP: ' + str(TABLE_TOP))
+print('LEG_BOTTOMS: ' + str(LEG_BOTTOMS))
 
 gmsh.model.addPhysicalGroup(0, [n[1] for n in gmsh.model.getEntities(0)], 2001, "NODES")
-gmsh.model.addPhysicalGroup(2, [e[1] for e in TABLE_TOP], 2201, "TABLE_TOP")
-gmsh.model.addPhysicalGroup(2, [e[1] for e in LEG_BOTTOMS], 2202, "LEG_BOTTOMS")
+gmsh.model.addPhysicalGroup(0, [e[1] for e in TABLE_TOP], 2201, "TABLE_TOP")
+gmsh.model.addPhysicalGroup(0, [e[1] for e in LEG_BOTTOMS], 2202, "LEG_BOTTOMS")
 gmsh.model.addPhysicalGroup(3, [e[1] for e in gmsh.model.getEntities(3)], 2301, "VOLUME")
 
 #####################################################
