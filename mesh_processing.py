@@ -1,11 +1,14 @@
 import gmsh
 import json
+import math
+
 
 with open('config.json') as f:
     config = json.load(f)
 
+
 # Initialization
-gmsh.initialize()
+gmsh.initialize(interruptible = False)
 gmsh.option.setNumber("General.Terminal", 1)
 gmsh.model.add("My_Structure")
 
@@ -17,6 +20,7 @@ gmsh.merge(file_path)
 
 #####################################################
 # create mesh surfaces using facet groups of 3
+gmsh.model.mesh.createTopology()
 gmsh.model.mesh.classifySurfaces(1e-6)
 print('Classified Surfaces\n')
 gmsh.model.mesh.createGeometry()
@@ -75,12 +79,14 @@ gmsh.model.addPhysicalGroup(3, [e[1] for e in gmsh.model.getEntities(3)], 2301, 
 gmsh.option.setNumber("Mesh.Algorithm", 6)  # Set algorithm to generate hexahedron mesh
 gmsh.option.setNumber("Mesh.Algorithm3D", 1)  # Set algorithm for 3D meshing to Delaunay
 gmsh.option.setNumber("Mesh.CharacteristicLengthMin", 10)
-gmsh.option.setNumber("Mesh.CharacteristicLengthMax", 50)
-gmsh.option.setNumber("Mesh.SubdivisionAlgorithm", 2)
-
+gmsh.option.setNumber("Mesh.CharacteristicLengthMax", 10000000)
+#gmsh.option.setNumber("Mesh.SubdivisionAlgorithm", 2)
+gmsh.option.setNumber("Mesh.AngleToleranceFacetOverlap", 0.00001)
+print('Meshing Parameters Set\n')
 # Create 20-node hexahedrons
-#gmsh.option.setNumber("Mesh.ElementOrder", 2)
+gmsh.option.setNumber("Mesh.ElementOrder", 1)
 #gmsh.option.setNumber("Mesh.SecondOrderIncomplete", 1)
+
 # Create mesh
 gmsh.model.mesh.generate(3)
 #gmsh.model.mesh.refine()
