@@ -1,11 +1,13 @@
 import os
 import subprocess
+import gmsh
 from mesh_processing import mesh_processing as mp
 from modify_inp import modify_inp as mi
 from ccx_inp import ccx_inp as ccx
 from cgx_frd import cgx_frd as cf
 
 path = "Thingi10K/selected/"
+ERRORS = []
 
 for _, _, files in os.walk(path):
     for file in files:
@@ -25,14 +27,19 @@ for _, _, files in os.walk(path):
                 # if the sixth from the last line of the output file does not contain "Job finished", write an error message to the error log
                 output_lines = outfile.readlines()
                 if not "Job finished" in output_lines[-6]:
+                    ERRORS.append([file_path, output_lines])
                     with open(path + "error_log.txt", "a") as error_log:
                         error_log.write(f"Error processing file {file_path}:\n")
                         error_log.write("".join(output_lines) + "\n\n")
                     continue
         except Exception as e:
             print(f"Error processing file {file_path}: {str(e)}")
+            ERRORS.append([file_path, str(e)])
             with open(path + "error_log.txt", "a") as error_log:
                 error_log.write(f"Error processing file {file_path}: {str(e)}\n\n")
             continue
         #frd_file = ccx(inp_file)
         #cf(frd_file)
+
+print("Error log:")
+print(ERRORS)

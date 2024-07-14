@@ -7,7 +7,9 @@ import math
 
 def mesh_processing(file_path):
     # Initialization
+    # Clean up any existing model
     gmsh.initialize(interruptible = False)
+    gmsh.clear()
     gmsh.option.setNumber("General.Terminal", 1)
     gmsh.model.add("My_Structure")
 
@@ -19,7 +21,7 @@ def mesh_processing(file_path):
 
 #####################################################
     # create mesh surfaces using facet groups of 3
-    gmsh.model.mesh.createTopology()
+    #gmsh.model.mesh.createTopology()
     gmsh.model.mesh.classifySurfaces(1e-6)
     print('Classified Surfaces\n')
     gmsh.model.mesh.createGeometry()
@@ -37,6 +39,7 @@ def mesh_processing(file_path):
 
 #####################################################
     surfaces = gmsh.model.getEntities(2)
+    print('Surfaces: ' + str(surfaces) + '\n')
 
 # Create a surface loop from the entire structure
     surface_loop = gmsh.model.geo.addSurfaceLoop([s[1] for s in surfaces])
@@ -78,12 +81,12 @@ def mesh_processing(file_path):
     gmsh.option.setNumber("Mesh.Algorithm", 6)  # Set algorithm to generate hexahedron mesh
     gmsh.option.setNumber("Mesh.Algorithm3D", 1)  # Set algorithm for 3D meshing to Delaunay
     gmsh.option.setNumber("Mesh.CharacteristicLengthMin", 10)
-    gmsh.option.setNumber("Mesh.CharacteristicLengthMax", 10000000)
+    gmsh.option.setNumber("Mesh.CharacteristicLengthMax", 50)
     #gmsh.option.setNumber("Mesh.SubdivisionAlgorithm", 2)
     gmsh.option.setNumber("Mesh.AngleToleranceFacetOverlap", 0.00001)
     print('Meshing Parameters Set\n')
     # Create 20-node hexahedrons
-    gmsh.option.setNumber("Mesh.ElementOrder", 1)
+    #gmsh.option.setNumber("Mesh.ElementOrder", 2)
     #gmsh.option.setNumber("Mesh.SecondOrderIncomplete", 1)
 
     # Create mesh
@@ -118,6 +121,6 @@ def mesh_processing(file_path):
     #gmsh.write("gmsh_test_1.msh")
 
     # Visualize the mesh
-    #gmsh.fltk.run()
+    gmsh.fltk.run()
     gmsh.finalize()
     return inp_file
