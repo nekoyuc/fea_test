@@ -130,7 +130,6 @@ def check_water_tightness(ms):
     # Check if key "inertia_tensor" exists in the measures dictionary. If so, mesh is watertight.
     if "inertia_tensor" in measures:
         # Key "inertia_tensor" exists in the measures dictionary
-        print(measures["inertia_tensor"])
         print("Mesh is watertight")
         return True
     else:
