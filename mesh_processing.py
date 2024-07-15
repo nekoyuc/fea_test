@@ -9,7 +9,7 @@ def mesh_processing(file_path):
     # Initialization
     # Clean up any existing model
     gmsh.initialize(interruptible = False)
-    gmsh.clear()
+    #gmsh.clear()
     gmsh.option.setNumber("General.Terminal", 1)
     gmsh.model.add("My_Structure")
 
@@ -47,21 +47,6 @@ def mesh_processing(file_path):
 
     gmsh.model.geo.addVolume([surface_loop])
     gmsh.model.geo.synchronize()
-
-    '''
-    # Retag entities
-    for i, p in enumerate(gmsh.model.getEntities(0)):
-        gmsh.model.setTag(0, p[1], 1001 + i)
-
-    for i, l in enumerate(gmsh.model.getEntities(1)):
-        gmsh.model.setTag(1, l[1], 1101 + i)
-
-    for i, s in enumerate(gmsh.model.getEntities(2)):
-        gmsh.model.setTag(2, s[1], 1201 + i)
-
-    for i, v in enumerate(gmsh.model.getEntities(3)):
-        gmsh.model.setTag(3, v[1], 1301 + i)
-    '''
 
 # Create fixed surfaces on the ground, and add a force on the top surfaces
 # add a node set of all nodes
@@ -121,6 +106,6 @@ def mesh_processing(file_path):
     #gmsh.write("gmsh_test_1.msh")
 
     # Visualize the mesh
-    gmsh.fltk.run()
+    #gmsh.fltk.run()
     gmsh.finalize()
     return inp_file

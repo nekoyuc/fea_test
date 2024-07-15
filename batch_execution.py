@@ -17,12 +17,12 @@ for _, _, files in os.walk(path):
         file_path = path + file
         try:
             inp_file = mp(file_path)
+            ## If mp encounters an error, jump to the except block
             mi(inp_file)
             inp_file = inp_file.replace(".inp", "")
             command = "ccx " + inp_file
             with open(inp_file + "_output.txt", "w") as outfile:
                 subprocess.run(f"{command} | tail -n 6", shell = True, stdout = outfile, stderr = outfile)
-                
             with open(inp_file + "_output.txt", "r") as outfile:
                 # if the sixth from the last line of the output file does not contain "Job finished", write an error message to the error log
                 output_lines = outfile.readlines()
@@ -32,8 +32,11 @@ for _, _, files in os.walk(path):
                         error_log.write(f"Error processing file {file_path}:\n")
                         error_log.write("".join(output_lines) + "\n\n")
                     continue
+                else:
+                    with open(path + "error_log.txt", "a") as error_log:
+                        error_log.write(f"File {file_path} processed successfully.\n\n")
         except Exception as e:
-            print(f"Error processing file {file_path}: {str(e)}")
+            gmsh.finalize()
             ERRORS.append([file_path, str(e)])
             with open(path + "error_log.txt", "a") as error_log:
                 error_log.write(f"Error processing file {file_path}: {str(e)}\n\n")
