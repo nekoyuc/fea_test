@@ -2,10 +2,13 @@ import pymeshlab
 import json
 from mesh_processors import check_water_tightness as cwt
 
+
+path = "Thingi10K/processed_meshes/"
+
 # Import dictionary from a json file
-with open("Thingi10K/selected/list_error.json", "r") as file:
+with open(path + "list_error.json", "r") as file:
     meshes = json.load(file)
-path = "Thingi10K/selected/"
+
 attempts = 3
 print(meshes)
 SUCCESS = {}
@@ -22,7 +25,7 @@ for key in meshes.keys():
         ms.apply_filter("generate_resampled_uniform_mesh", cellsize = pymeshlab.PercentageValue(cellsize_p), mergeclosevert = True, multisample = True)
         if cwt(ms):
             with open(path + "log_repair.txt", "a") as job_log:
-                job_log.write(f"Mesh {key} repaired successfully.\n\n")
+                job_log.write(f"Mesh {key} repaired successfully at attempt {i + 1}.\n\n")
             repaired_file = key.replace(".stl", "_repaired.stl")
             SUCCESS[repaired_file] = cellsize_p
             ms.save_current_mesh(path + repaired_file)
@@ -38,21 +41,3 @@ with open(path + "list_success.json", "w") as list_success:
     json.dump(SUCCESS, list_success)
 with open(path + "list_failure.json", "w") as list_failure:
     json.dump(FAILURE, list_failure)
-'''
-file_path = "Thingi10K/selected/36075.stl"
-ms = pymeshlab.MeshSet()
-ms.load_new_mesh(file_path)
-
-ms.apply_filter("meshing_isotropic_explicit_remeshing", adaptive = True, checksurfdist = False)
-# Check number of vertices and faces
-#print(ms.current_mesh().vertex_number())
-#print(ms.current_mesh().face_number())
-ms.apply_filter("generate_resampled_uniform_mesh", cellsize = pymeshlab.PercentageValue(1.5), mergeclosevert = True, multisample = True)
-# Check if mesh is watertight
-cwt(ms)
-
-# Save the mesh
-ms.save_current_mesh("Thingi10K/selected/36075_repaired.stl")
-# Clear the mesh
-ms.clear()
-'''

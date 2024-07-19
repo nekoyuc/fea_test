@@ -5,12 +5,12 @@ import math
 #with open('config.json') as f:
 #    config = json.load(f)
 
-def mesh_processing(file_path):
+def mesh_processing(file_name, file_path, output_path):
     # Initialization
     gmsh.initialize(interruptible = False)
     gmsh.option.setNumber("General.Terminal", 1)
     gmsh.model.add("My_Structure")
-    gmsh.merge(file_path)
+    gmsh.merge(file_path + file_name)
 
     #####################################################
     # create mesh surfaces using facet groups of 3
@@ -39,10 +39,10 @@ def mesh_processing(file_path):
     TABLE_TOP = gmsh.model.getEntitiesInBoundingBox(xmin, ymin, zmax - top_tol, xmax, ymax, zmax + top_tol, 0)
     LEG_BOTTOMS = gmsh.model.getEntitiesInBoundingBox(xmin, ymin, zmin - base_tol, xmax, ymax, zmin + base_tol, 0)
 
-    gmsh.model.addPhysicalGroup(0, [n[1] for n in gmsh.model.getEntities(0)], 2001, "NODES")
-    gmsh.model.addPhysicalGroup(0, [e[1] for e in TABLE_TOP], 2201, "TABLE_TOP")
-    gmsh.model.addPhysicalGroup(0, [e[1] for e in LEG_BOTTOMS], 2202, "LEG_BOTTOMS")
-    gmsh.model.addPhysicalGroup(3, [e[1] for e in gmsh.model.getEntities(3)], 2301, "VOLUME")
+    gmsh.model.addPhysicalGroup(0, [n[1] for n in gmsh.model.getEntities(0)], 1001, "NODES")
+    gmsh.model.addPhysicalGroup(0, [e[1] for e in TABLE_TOP], 2001, "TABLE_TOP")
+    gmsh.model.addPhysicalGroup(0, [e[1] for e in LEG_BOTTOMS], 2002, "LEG_BOTTOMS")
+    gmsh.model.addPhysicalGroup(3, [e[1] for e in gmsh.model.getEntities(3)], 3001, "VOLUME")
 
     #####################################################
     # Meshing parameters
@@ -82,15 +82,20 @@ def mesh_processing(file_path):
 
     # Export to inp file
     #gmsh.write(file_path.split("/")[-1].replace(".stl", "") + ".inp")
-    inp_file = file_path.replace(".stl", ".inp")
+    inp_file = output_path + file_name
+    inp_file = inp_file.replace(".stl", ".inp")
     gmsh.write(inp_file)
 
     # Write mesh to file
-    #gmsh.write("gmsh_test_1.msh")
+    #gmsh.write(output_path + file_name.replace(".stl", ".msh"))
 
     # Visualize the mesh
     #gmsh.fltk.run()
     gmsh.finalize()
+    
+    # Export mesh to obj
+    #gmsh.write("file.obj")
+
     return inp_file
 
 def modify_inp(inp_file_path):
