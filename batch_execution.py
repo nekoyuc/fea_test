@@ -34,6 +34,8 @@ files = get_files(inpath, method = "directory", json_name = "list_success.json")
 
 for file in files:
     file_path = inpath + file
+    with open("trials.txt", "w") as log:
+        log.write(f"Started file {file}.\n")
     try:
         # Process mesh with gmsh
         inp_file_path = mp(file, inpath, outpath)

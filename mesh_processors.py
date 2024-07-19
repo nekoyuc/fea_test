@@ -36,12 +36,12 @@ def mesh_processing(file_name, file_path, output_path):
     # Create fixed surfaces on the ground, and add a force on the top surfaces
     base_tol = 0.01
     top_tol = 0.01
-    TABLE_TOP = gmsh.model.getEntitiesInBoundingBox(xmin, ymin, zmax - top_tol, xmax, ymax, zmax + top_tol, 0)
-    LEG_BOTTOMS = gmsh.model.getEntitiesInBoundingBox(xmin, ymin, zmin - base_tol, xmax, ymax, zmin + base_tol, 0)
+    TABLE_TOP = gmsh.model.getEntitiesInBoundingBox(xmin, ymin, zmax - top_tol, xmax, ymax, zmax + top_tol, 2)
+    LEG_BOTTOMS = gmsh.model.getEntitiesInBoundingBox(xmin, ymin, zmin - base_tol, xmax, ymax, zmin + base_tol, 2)
 
     gmsh.model.addPhysicalGroup(0, [n[1] for n in gmsh.model.getEntities(0)], 1001, "NODES")
-    gmsh.model.addPhysicalGroup(0, [e[1] for e in TABLE_TOP], 2001, "TABLE_TOP")
-    gmsh.model.addPhysicalGroup(0, [e[1] for e in LEG_BOTTOMS], 2002, "LEG_BOTTOMS")
+    gmsh.model.addPhysicalGroup(2, [e[1] for e in TABLE_TOP], 2001, "TABLE_TOP")
+    gmsh.model.addPhysicalGroup(2, [e[1] for e in LEG_BOTTOMS], 2002, "LEG_BOTTOMS")
     gmsh.model.addPhysicalGroup(3, [e[1] for e in gmsh.model.getEntities(3)], 3001, "VOLUME")
 
     #####################################################
@@ -89,13 +89,13 @@ def mesh_processing(file_name, file_path, output_path):
     # Write mesh to file
     #gmsh.write(output_path + file_name.replace(".stl", ".msh"))
 
+    # Export mesh
+    
+
     # Visualize the mesh
     #gmsh.fltk.run()
     gmsh.finalize()
     
-    # Export mesh to obj
-    #gmsh.write("file.obj")
-
     return inp_file
 
 def modify_inp(inp_file_path):
