@@ -3,7 +3,7 @@ import json
 from mesh_processors import check_water_tightness as cwt
 
 
-path = "Thingi10K/processed_meshes/"
+path = "Thingi10K/selected/"
 
 # Import dictionary from a json file
 with open(path + "list_error.json", "r") as file:

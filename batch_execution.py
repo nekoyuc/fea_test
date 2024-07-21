@@ -2,13 +2,14 @@ import os
 import subprocess
 import gmsh
 import json
+from collections import deque
 from mesh_processors import mesh_processing as mp
 from mesh_processors import modify_inp as mi
 #from ccx_inp import ccx_inp as ccx
 #from cgx_frd import cgx_frd as cf
 
-inpath = "Thingi10K/raw_meshes/"
-outpath = "Thingi10K/processed_meshes/"
+inpath = "Thingi10K/debug/"
+outpath = "Thingi10K/debug/"
 ERRORS = {}
 
 def get_files(inpath, method = "directory", json_name = ""):
@@ -29,13 +30,21 @@ def get_files(inpath, method = "directory", json_name = ""):
     elif method == "custom":
         files = []
         return files
+    
+def write_to_log(stl_file, log_file, message):
+    with open(log_file, "a") as log:
+        log.write(f"{stl_file} results:\n")
+        log.write(message)
 
+###################################################
+###################################################
 files = get_files(inpath, method = "directory", json_name = "list_success.json")
 
 for file in files:
     file_path = inpath + file
     with open("trials.txt", "w") as log:
         log.write(f"Started file {file}.\n")
+    message = ""
     try:
         # Process mesh with gmsh
         inp_file_path = mp(file, inpath, outpath)
@@ -44,26 +53,29 @@ for file in files:
         mi(inp_file_path)
         inp_file_path = inp_file_path.replace(".inp", "")
         command = "ccx " + inp_file_path
-        with open(outpath + file + "_output.txt", "w") as outfile:
+        
+        #message = run_and_capture_tail(command)
+        
+        with open(outpath + "_ccx_output.txt", "w") as outfile:
             # Run Calculix with the modified .inp file
-            subprocess.run(f"{command} | tail -n 6", shell = True, stdout = outfile, stderr = outfile)
-        with open(outpath + file + "_output.txt", "r") as outfile:
+            subprocess.run(f"{command} | tail -n 6", shell=True, stdout=outfile, stderr=outfile)        
+            #run_with_timeout(command, outfile)
+
+        with open(outpath + "_ccx_output.txt", "r") as outfile:
             # if the sixth from the last line of the output file does not contain "Job finished", write an error message to the error log
             output_lines = outfile.readlines()
             if not "Job finished" in output_lines[-6]:
                 ERRORS[file] = output_lines
-                with open(outpath + "log_job.txt", "a") as log_job:
-                    log_job.write(f"Error in Calculix analysis for file {file}:\n")
-                    log_job.write("".join(output_lines) + "\n\n")
-                continue
+                message = "".join(output_lines)
             else:
-                with open(outpath + "log_job.txt", "a") as log_job:
-                    log_job.write(f"File {file} processed successfully.\n\n")
+                message = "Calculix analysis completed successfully.\n\n"
+        
+        write_to_log(file, outpath + "log_job.txt", message)
+
     except Exception as e:
         gmsh.finalize()
         ERRORS[file] = str(e)
-        with open(outpath + "log_job.txt", "a") as log_job:
-            log_job.write(f"Error processing file {file}: {str(e)}\n\n")
+        write_to_log(file, outpath + "log_job.txt", str(e)+"\n\n")
         continue
 
 # Export ERRORS to a json file
