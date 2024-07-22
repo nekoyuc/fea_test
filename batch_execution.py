@@ -8,8 +8,8 @@ from mesh_processors import modify_inp as mi
 #from ccx_inp import ccx_inp as ccx
 #from cgx_frd import cgx_frd as cf
 
-inpath = "Thingi10K/debug/"
-outpath = "Thingi10K/debug/"
+inpath = "Thingi10K/selected/"
+outpath = "Thingi10K/selected/"
 ERRORS = {}
 
 def get_files(inpath, method = "directory", json_name = ""):
@@ -36,10 +36,32 @@ def write_to_log(stl_file, log_file, message):
         log.write(f"{stl_file} results:\n")
         log.write(message)
 
+def mp_subprocess(file, inpath, outpath, ERROR):
+    try:
+        result = subprocess.run(
+            ["python3", "-c", f"import mesh_processors; mesh_processors.mesh_processing('{file}', '{inpath}', '{outpath}')"],
+            capture_output = True
+            )
+        output = result.stdout.decode("utf-8")
+        print("finished mp subprocess")
+        if result.returncode == 0:
+            print("finished\n")
+            return True
+        else:
+            print("Error\n")
+            raise subprocess.CalledProcessError(result.returncode, result.args)
+    except subprocess.CalledProcessError as e:
+        print("exception\n")
+        message = f'Error processingsss {file}: {e}\n\n'
+        ERROR[file] = message
+        write_to_log(file, outpath + "log_job.txt", message)
+        return None
+
 ###################################################
 ###################################################
 files = get_files(inpath, method = "directory", json_name = "list_success.json")
 
+'''
 for file in files:
     file_path = inpath + file
     with open("trials.txt", "w") as log:
@@ -76,6 +98,34 @@ for file in files:
         ERRORS[file] = str(e)
         write_to_log(file, outpath + "log_job.txt", str(e)+"\n\n")
         continue
+
+'''
+
+for file in files:
+    with open("trials.txt", "w") as log:
+        log.write(f"Started file {file}.\n")
+    message = ""
+    result = mp_subprocess(file, inpath, outpath, ERRORS)
+    if result:
+        inp_file_path = outpath + file
+        inp_file_path = inp_file_path.replace(".stl", ".inp")
+        mi(inp_file_path)
+        inp_file_path = inp_file_path.replace(".inp", "")
+
+        command = "ccx " + inp_file_path
+
+        with open(outpath + "_ccx_output.txt", "w") as outfile:
+            subprocess.run(f"{command} | tail -n 6", shell=True, stdout=outfile, stderr=outfile)
+        
+        with open(outpath + "_ccx_output.txt", "r") as outfile:
+            output_lines = outfile.readlines()
+            if not "Job finished" in output_lines[-6]:
+                ERRORS[file] = output_lines
+                message = "".join(output_lines)
+            else:
+                message = "Calculix analysis completed successfully.\n\n"
+        
+        write_to_log(file, outpath + "log_job.txt", message)
 
 # Export ERRORS to a json file
 with open(outpath + "list_error.json", "w") as list_error:

@@ -97,9 +97,7 @@ def mesh_processing(file_name, file_path, output_path):
 
     # Visualize the mesh
     #gmsh.fltk.run()
-    gmsh.finalize()
-    
-    return inp_file
+    gmsh.finalize()    
 
 def modify_inp(inp_file_path):
     #file_path = file_path.replace(".stl", ".inp")
