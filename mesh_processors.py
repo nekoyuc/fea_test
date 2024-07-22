@@ -7,6 +7,9 @@ import math
 
 def mesh_processing(file_name, file_path, output_path):
     # Initialization
+    # Check if gmsh is initialized
+    if gmsh.is_initialized():
+        gmsh.finalize()
     gmsh.initialize(interruptible = False)
     gmsh.option.setNumber("General.Terminal", 1)
     gmsh.model.add("My_Structure")

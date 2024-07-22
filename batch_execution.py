@@ -73,7 +73,6 @@ for file in files:
         write_to_log(file, outpath + "log_job.txt", message)
 
     except Exception as e:
-        gmsh.finalize()
         ERRORS[file] = str(e)
         write_to_log(file, outpath + "log_job.txt", str(e)+"\n\n")
         continue
