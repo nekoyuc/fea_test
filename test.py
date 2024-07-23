@@ -5,7 +5,8 @@ from mesh_processors import modify_inp as mi
 import pygame
 import pyvista as pv
 
-file = "82055.stl"
+#file = "1452670.stl"
+file = "1147240.stl"
 inpath = "Thingi10K/debug/"
 outpath = "Thingi10K/debug/"
 mp(file, inpath, outpath)

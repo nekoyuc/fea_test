@@ -1,6 +1,7 @@
 import gmsh
 import json
 import math
+import pymeshlab
 
 #with open('config.json') as f:
 #    config = json.load(f)
@@ -130,15 +131,27 @@ def modify_inp(inp_file_path):
         additional_contents += "*END STEP\n"
 
         file.write(additional_contents)
-    
+
+def repair_mesh(mesh_path, key, result_path, cellsize_p):
+    file_path = mesh_path + key
+    ms = pymeshlab.MeshSet()
+    ms.load_new_mesh(file_path)
+    ms.apply_filter("meshing_isotropic_explicit_remeshing", adaptive = True, checksurfdist = False)
+    ms.apply_filter("generate_resampled_uniform_mesh", cellsize = pymeshlab.PercentageValue(cellsize_p), mergeclosevert = True, multisample = True)
+        
+    if check_water_tightness(ms):
+        repaired_file = key.replace(".stl", "_repaired.stl")
+        ms.save_current_mesh(result_path + repaired_file)
+        print("good")
+    else:
+        print("bad")
+
 def check_water_tightness(ms):
     measures = ms.apply_filter("get_geometric_measures")
     # Check if key "inertia_tensor" exists in the measures dictionary. If so, mesh is watertight.
     if "inertia_tensor" in measures:
         # Key "inertia_tensor" exists in the measures dictionary
-        print("Mesh is watertight")
         return True
     else:
         # Key "inertia_tensor" does not exist in the measures dictionary
-        print("Mesh is not watertight")
         return False

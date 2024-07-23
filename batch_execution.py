@@ -5,11 +5,13 @@ import json
 from collections import deque
 from mesh_processors import mesh_processing as mp
 from mesh_processors import modify_inp as mi
+import subprocess
+import time
 #from ccx_inp import ccx_inp as ccx
 #from cgx_frd import cgx_frd as cf
 
-inpath = "Thingi10K/selected/"
-outpath = "Thingi10K/selected/"
+inpath = "Thingi10K/raw_meshes/Batch1/"
+outpath = "Thingi10K/raw_meshes/Batch1_results/"
 ERRORS = {}
 
 def get_files(inpath, method = "directory", json_name = ""):
@@ -21,7 +23,7 @@ def get_files(inpath, method = "directory", json_name = ""):
                 files.remove(file)
         return files
     elif method == "json":
-        with open(inpath + json_name, "r") as file:
+        with open(outpath + json_name, "r") as file:
             files_list = json.load(file)
         files = []
         for key in files_list.keys():
@@ -31,30 +33,45 @@ def get_files(inpath, method = "directory", json_name = ""):
         files = []
         return files
     
-def write_to_log(stl_file, log_file, message):
+def write_to_log(stl_file, log_file, count, message):
     with open(log_file, "a") as log:
-        log.write(f"{stl_file} results:\n")
+        log.write(f"Count {count}, {stl_file} results:\n")
         log.write(message)
 
 def mp_subprocess(file, inpath, outpath, ERROR):
     try:
         result = subprocess.run(
             ["python3", "-c", f"import mesh_processors; mesh_processors.mesh_processing('{file}', '{inpath}', '{outpath}')"],
-            capture_output = True
-            )
+            capture_output=True,
+            timeout=400  # Set the timeout value in seconds
+        )
         output = result.stdout.decode("utf-8")
-        print("finished mp subprocess")
+        print(str(file) + "finished mp subprocess")
         if result.returncode == 0:
             print("finished\n")
             return True
         else:
             print("Error\n")
+            # Take the last 6 lines of output
+            output_lines = output.splitlines()
+            output_lines = output_lines[-6:]
+            message = "Error\n" + f'Error processing {file}: {output_lines}\n\n'
+            ERROR[file] = message
+            write_to_log(file, outpath + "log_job.txt", count, message)
             raise subprocess.CalledProcessError(result.returncode, result.args)
+    except subprocess.TimeoutExpired:
+        print("Timeout\n")
+        output_lines = output.splitlines()
+        output_lines = output_lines[-6:]
+        message = "Timeout\n" + f'Timeout processing {file}: {output_lines}\n\n'
+        ERROR[file] = message
+        write_to_log(file, outpath + "log_job.txt", count, message)
+        return None
     except subprocess.CalledProcessError as e:
         print("exception\n")
-        message = f'Error processingsss {file}: {e}\n\n'
+        message = "Exception\n" + f'Error processing {file}: {e}\n\n'
         ERROR[file] = message
-        write_to_log(file, outpath + "log_job.txt", message)
+        write_to_log(file, outpath + "log_job.txt", count, message)
         return None
 
 ###################################################
@@ -100,7 +117,7 @@ for file in files:
         continue
 
 '''
-
+count = 1
 for file in files:
     with open("trials.txt", "w") as log:
         log.write(f"Started file {file}.\n")
@@ -121,11 +138,12 @@ for file in files:
             output_lines = outfile.readlines()
             if not "Job finished" in output_lines[-6]:
                 ERRORS[file] = output_lines
-                message = "".join(output_lines)
+                message = "Calculix\n" + "".join(output_lines)
             else:
                 message = "Calculix analysis completed successfully.\n\n"
         
-        write_to_log(file, outpath + "log_job.txt", message)
+        write_to_log(file, outpath + "log_job.txt", count, message)
+    count = count + 1
 
 # Export ERRORS to a json file
 with open(outpath + "list_error.json", "w") as list_error:
