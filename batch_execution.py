@@ -10,20 +10,20 @@ import time
 #from ccx_inp import ccx_inp as ccx
 #from cgx_frd import cgx_frd as cf
 
-inpath = "Thingi10K/raw_meshes/Batch1/"
+inpath = "Thingi10K/raw_meshes/Batch1_results/"
 outpath = "Thingi10K/raw_meshes/Batch1_results/"
 ERRORS = {}
 
-def get_files(inpath, method = "directory", json_name = ""):
+def get_files(path, method = "directory", json_name = ""):
     if method == "directory":
-        files = os.listdir(inpath)
+        files = os.listdir(path)
         # delete files that do not end with ".stl"
         for file in files:
             if not file.endswith(".stl"):
                 files.remove(file)
         return files
     elif method == "json":
-        with open(outpath + json_name, "r") as file:
+        with open(path + json_name, "r") as file:
             files_list = json.load(file)
         files = []
         for key in files_list.keys():
@@ -46,7 +46,7 @@ def mp_subprocess(file, inpath, outpath, ERROR):
             timeout=400  # Set the timeout value in seconds
         )
         output = result.stdout.decode("utf-8")
-        print(str(file) + "finished mp subprocess")
+        print(str(file) + " finished mp subprocess")
         if result.returncode == 0:
             print("finished\n")
             return True
@@ -76,7 +76,7 @@ def mp_subprocess(file, inpath, outpath, ERROR):
 
 ###################################################
 ###################################################
-files = get_files(inpath, method = "directory", json_name = "list_success.json")
+files = get_files(inpath, method = "json", json_name = "list_success.json")
 
 '''
 for file in files:

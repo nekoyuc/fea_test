@@ -145,6 +145,7 @@ def repair_mesh(mesh_path, key, result_path, cellsize_p):
         print("good")
     else:
         print("bad")
+    ms.clear()
 
 def check_water_tightness(ms):
     measures = ms.apply_filter("get_geometric_measures")

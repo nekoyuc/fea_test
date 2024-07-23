@@ -16,7 +16,7 @@ print(meshes)
 SUCCESS = {}
 FAILURE = {}
 
-for key in ["1087143.stl", "1087134.stl", "195700_.stl", "1120764.stl"]:
+for key in meshes.keys():
     print(f"\nfile {key} repair attempt starts")
     for i in range(attempts_n):
         cellsize_p = 1.5 + i * 0.25
