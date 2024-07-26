@@ -4,12 +4,13 @@ from mesh_processors import mesh_processing as mp
 from mesh_processors import modify_inp as mi
 import pygame
 import pyvista as pv
+import subprocess
 
 #file = "1452670.stl"
 file = "1147240.stl"
 inpath = "Thingi10K/debug/"
-outpath = "Thingi10K/debug/"
-mp(file, inpath, outpath)
+outpath = "Thingi10K/raw_meshes/Batch5_results/"
+#mp(file, inpath, outpath)
 #mi(outpath + file.replace(".stl", ".inp"))
 
 '''
@@ -27,3 +28,19 @@ plotter.add_mesh(mesh)
 # Display the plotter
 plotter.show()
 '''
+
+files = os.listdir(outpath)
+print("length of files: " + str(len(files)))
+# delete files that do not end with ".stl"
+for file in files:
+    # get the last 4 characters of the file name
+    file_extension = file[-4:]
+    if file_extension != ".frd":
+        files.remove(file)
+
+print("length of files: " + str(len(files)))
+print(files)
+
+for file in files:
+    command = "cgx " + outpath + file
+    subprocess.run(f"{command} | tail -n 6", shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)

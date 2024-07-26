@@ -10,10 +10,6 @@ import time
 #from ccx_inp import ccx_inp as ccx
 #from cgx_frd import cgx_frd as cf
 
-inpath = "Thingi10K/raw_meshes/Batch1_results/"
-outpath = "Thingi10K/raw_meshes/Batch1_results/"
-ERRORS = {}
-
 def get_files(path, method = "directory", json_name = ""):
     if method == "directory":
         files = os.listdir(path)
@@ -45,7 +41,7 @@ def mp_subprocess(file, inpath, outpath, ERROR):
             capture_output=True,
             timeout=400  # Set the timeout value in seconds
         )
-        output = result.stdout.decode("utf-8")
+        output = result.stdout
         print(str(file) + " finished mp subprocess")
         if result.returncode == 0:
             print("finished\n")
@@ -61,9 +57,7 @@ def mp_subprocess(file, inpath, outpath, ERROR):
             raise subprocess.CalledProcessError(result.returncode, result.args)
     except subprocess.TimeoutExpired:
         print("Timeout\n")
-        output_lines = output.splitlines()
-        output_lines = output_lines[-6:]
-        message = "Timeout\n" + f'Timeout processing {file}: {output_lines}\n\n'
+        message = "Timeout\n" + f'Timeout processing {file}\n\n'
         ERROR[file] = message
         write_to_log(file, outpath + "log_job.txt", count, message)
         return None
@@ -76,10 +70,20 @@ def mp_subprocess(file, inpath, outpath, ERROR):
 
 ###################################################
 ###################################################
-files = get_files(inpath, method = "json", json_name = "list_success.json")
+inpath = "Thingi10K/raw_meshes/Batch7/"
+outpath = "Thingi10K/raw_meshes/Batch7_results/"
+ERRORS = {}
+files = get_files(inpath, method = "directory", json_name = "list_success.json")
+
+count = 1
 
 '''
+
 for file in files:
+    if file in ["1717685.stl", "1717686.stl", "1706478.stl"]:
+        write_to_log(file, outpath + "log_job.txt", count, "Skipped\n\n")
+        count = count + 1
+        continue
     file_path = inpath + file
     with open("trials.txt", "w") as log:
         log.write(f"Started file {file}.\n")
@@ -93,12 +97,9 @@ for file in files:
         inp_file_path = inp_file_path.replace(".inp", "")
         command = "ccx " + inp_file_path
         
-        #message = run_and_capture_tail(command)
-        
         with open(outpath + "_ccx_output.txt", "w") as outfile:
             # Run Calculix with the modified .inp file
             subprocess.run(f"{command} | tail -n 6", shell=True, stdout=outfile, stderr=outfile)        
-            #run_with_timeout(command, outfile)
 
         with open(outpath + "_ccx_output.txt", "r") as outfile:
             # if the sixth from the last line of the output file does not contain "Job finished", write an error message to the error log
@@ -109,15 +110,18 @@ for file in files:
             else:
                 message = "Calculix analysis completed successfully.\n\n"
         
-        write_to_log(file, outpath + "log_job.txt", message)
+        write_to_log(file, outpath + "log_job.txt", count, message)
+        count = count + 1
 
     except Exception as e:
         ERRORS[file] = str(e)
-        write_to_log(file, outpath + "log_job.txt", str(e)+"\n\n")
+        write_to_log(file, outpath + "log_job.txt", count, str(e)+"\n\n")
+        count = count + 1
         continue
+    
 
 '''
-count = 1
+
 for file in files:
     with open("trials.txt", "w") as log:
         log.write(f"Started file {file}.\n")
@@ -144,6 +148,7 @@ for file in files:
         
         write_to_log(file, outpath + "log_job.txt", count, message)
     count = count + 1
+
 
 # Export ERRORS to a json file
 with open(outpath + "list_error.json", "w") as list_error:
