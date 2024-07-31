@@ -70,10 +70,10 @@ def mp_subprocess(file, inpath, outpath, ERROR):
 
 ###################################################
 ###################################################
-inpath = "Thingi10K/raw_meshes/Batch7/"
-outpath = "Thingi10K/raw_meshes/Batch7_results/"
+inpath = "Thingi10K/raw_meshes/Batch14_results/"
+outpath = "Thingi10K/raw_meshes/Batch14_results/"
 ERRORS = {}
-files = get_files(inpath, method = "directory", json_name = "list_success.json")
+files = get_files(inpath, method = "json", json_name = "list_success.json")
 
 count = 1
 

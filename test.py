@@ -9,7 +9,7 @@ import subprocess
 #file = "1452670.stl"
 file = "1147240.stl"
 inpath = "Thingi10K/debug/"
-outpath = "Thingi10K/raw_meshes/Batch5_results/"
+outpath = "Thingi10K/raw_meshes/Batch14_results/"
 #mp(file, inpath, outpath)
 #mi(outpath + file.replace(".stl", ".inp"))
 
@@ -29,17 +29,19 @@ plotter.add_mesh(mesh)
 plotter.show()
 '''
 
-files = os.listdir(outpath)
-print("length of files: " + str(len(files)))
+list = os.listdir(outpath)
+print("length of list: " + str(len(list)))
+files = []
+
 # delete files that do not end with ".stl"
-for file in files:
+for i in list:
     # get the last 4 characters of the file name
-    file_extension = file[-4:]
-    if file_extension != ".frd":
-        files.remove(file)
+    file_extension = i[-4:]
+    if file_extension == ".frd":
+        print(f"To add: {i}")
+        files.append(i)
 
 print("length of files: " + str(len(files)))
-print(files)
 
 for file in files:
     command = "cgx " + outpath + file

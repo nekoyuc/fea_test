@@ -4,8 +4,8 @@ import json
 from mesh_processors import check_water_tightness as cwt
 from mesh_processors import repair_mesh
 
-mesh_path = "Thingi10K/raw_meshes/Batch6/"
-result_path = "Thingi10K/raw_meshes/Batch6_results/"
+mesh_path = "Thingi10K/raw_meshes/Batch14/"
+result_path = "Thingi10K/raw_meshes/Batch14_results/"
 
 # Import dictionary from a json file
 with open(result_path + "list_error.json", "r") as file:
