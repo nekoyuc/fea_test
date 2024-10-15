@@ -115,7 +115,8 @@ def modify_inp(inp_file_path):
         additional_contents += "*BOUNDARY, FIXED\n"
         additional_contents += "LEG_BOTTOMS,1,3\n\n"
 
-        additional_contents += "*STEP,INC=100,NLGEOM=YES\n"
+        #additional_contents += "*STEP,INC=100,NLGEOM=YES\n"
+        additional_contents += "*STEP, INC=100\n"
         additional_contents += "*STATIC\n\n"
 
         additional_contents += "*DLOAD\n"

@@ -34,48 +34,56 @@ def write_to_log(stl_file, log_file, count, message):
         log.write(f"Count {count}, {stl_file} results:\n")
         log.write(message)
 
-def mp_subprocess(file, inpath, outpath, ERROR):
+def mp_subprocess(file, inpath, outpath, ERROR, message):
     try:
+        start_time = time.time()  # Record the start time
         result = subprocess.run(
             ["python3", "-c", f"import mesh_processors; mesh_processors.mesh_processing('{file}', '{inpath}', '{outpath}')"],
             capture_output=True,
-            timeout=400  # Set the timeout value in seconds
+            timeout=200  # Set the timeout value in seconds
         )
+        end_time = time.time()  # Record the end time
+        execution_time = end_time - start_time  # Calculate the execution time
         output = result.stdout
         print(str(file) + " finished mp subprocess")
         if result.returncode == 0:
-            print("finished\n")
+            file_end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + f".{int(time.time() % 1 * 1000):03d}"
+            message += f"MP e time: {file_end_time}\n"
+            message += f"MP success.\nMP processing time: {execution_time}\n\n"
+            write_to_log(file, outpath + "log_job.txt", count, message)
             return True
         else:
             print("Error\n")
             # Take the last 6 lines of output
             output_lines = output.splitlines()
             output_lines = output_lines[-6:]
-            message = "Error\n" + f'Error processing {file}: {output_lines}\n\n'
             ERROR[file] = message
+            file_end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + f".{int(time.time() % 1 * 1000):03d}"
+            message += f"MP e time: {file_end_time}\n"
+            message += f'Error processing {file}: {output_lines}\n' + f'MP processing time: {execution_time}\n\n'
             write_to_log(file, outpath + "log_job.txt", count, message)
             raise subprocess.CalledProcessError(result.returncode, result.args)
     except subprocess.TimeoutExpired:
         print("Timeout\n")
-        message = "Timeout\n" + f'Timeout processing {file}\n\n'
+        message += f'Timeout processing {file}\n\n'
         ERROR[file] = message
         write_to_log(file, outpath + "log_job.txt", count, message)
         return None
     except subprocess.CalledProcessError as e:
         print("exception\n")
-        message = "Exception\n" + f'Error processing {file}: {e}\n\n'
-        ERROR[file] = message
-        write_to_log(file, outpath + "log_job.txt", count, message)
+        #message = "Exception\n" + f'Error processing {file}: {e}\n' + f'MP processing time: {execution_time}\n\n'
+        #ERROR[file] = message
+        #write_to_log(file, outpath + "log_job.txt", count, message)
         return None
 
 ###################################################
 ###################################################
-inpath = "Thingi10K/raw_meshes/Batch14_results/"
-outpath = "Thingi10K/raw_meshes/Batch14_results/"
+### Modify inpath, outpath, and method as needed ###
+inpath = "Thingi10K/raw_meshes/Batch17/"
+outpath = "Thingi10K/raw_meshes/Batch17_results/"
+method = "directory" # "directory", "json", "custom"
 ERRORS = {}
-files = get_files(inpath, method = "json", json_name = "list_success.json")
-
-count = 1
+files = get_files(inpath, method = method, json_name = "list_success.json")
 
 '''
 
@@ -121,12 +129,15 @@ for file in files:
     
 
 '''
-
+count = 1
+total = len(files)
 for file in files:
     with open("trials.txt", "w") as log:
-        log.write(f"Started file {file}.\n")
+        log.write(f"Total number of files: {total}\nStarted file number {count}, {file}.\n")
     message = ""
-    result = mp_subprocess(file, inpath, outpath, ERRORS)
+    file_start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + f".{int(time.time() % 1 * 1000):03d}"
+    message += f"MP s time: {file_start_time}\n"
+    result = mp_subprocess(file, inpath, outpath, ERRORS, message)
     if result:
         inp_file_path = outpath + file
         inp_file_path = inp_file_path.replace(".stl", ".inp")
@@ -135,18 +146,21 @@ for file in files:
 
         command = "ccx " + inp_file_path
 
+        ccx_start_time = time.time()
         with open(outpath + "_ccx_output.txt", "w") as outfile:
             subprocess.run(f"{command} | tail -n 6", shell=True, stdout=outfile, stderr=outfile)
+        ccx_end_time = time.time()
+        ccx_execution_time = ccx_end_time - ccx_start_time
         
         with open(outpath + "_ccx_output.txt", "r") as outfile:
             output_lines = outfile.readlines()
             if not "Job finished" in output_lines[-6]:
                 ERRORS[file] = output_lines
-                message = "Calculix\n" + "".join(output_lines)
+                ccx_message = "Calculix\n" + "".join(output_lines) + f'\nCCX processing time: {ccx_execution_time}\n\n'
             else:
-                message = "Calculix analysis completed successfully.\n\n"
-        
-        write_to_log(file, outpath + "log_job.txt", count, message)
+                ccx_message = "Calculix analysis completed successfully." + f'\nCCX processing time: {ccx_execution_time}\n\n'
+
+        write_to_log(file, outpath + "log_job.txt", count, ccx_message)
     count = count + 1
 
 

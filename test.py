@@ -7,9 +7,9 @@ import pyvista as pv
 import subprocess
 
 #file = "1452670.stl"
-file = "1147240.stl"
+file = "799439.stl"
 inpath = "Thingi10K/debug/"
-outpath = "Thingi10K/raw_meshes/Batch14_results/"
+outpath = "Thingi10K/raw_meshes/Batch17_results/"
 #mp(file, inpath, outpath)
 #mi(outpath + file.replace(".stl", ".inp"))
 
@@ -29,6 +29,8 @@ plotter.add_mesh(mesh)
 plotter.show()
 '''
 
+
+################# review cgx output #################
 list = os.listdir(outpath)
 print("length of list: " + str(len(list)))
 files = []
@@ -46,3 +48,4 @@ print("length of files: " + str(len(files)))
 for file in files:
     command = "cgx " + outpath + file
     subprocess.run(f"{command} | tail -n 6", shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+################# review cgx output #################
