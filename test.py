@@ -9,7 +9,7 @@ import subprocess
 #file = "1452670.stl"
 file = "799439.stl"
 inpath = "Thingi10K/debug/"
-outpath = "Thingi10K/raw_meshes/Batch17_results/"
+outpath = "Thingi10K/raw_meshes/Batch2_results/"
 #mp(file, inpath, outpath)
 #mi(outpath + file.replace(".stl", ".inp"))
 
@@ -40,7 +40,6 @@ for i in list:
     # get the last 4 characters of the file name
     file_extension = i[-4:]
     if file_extension == ".frd":
-        print(f"To add: {i}")
         files.append(i)
 
 print("length of files: " + str(len(files)))

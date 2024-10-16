@@ -3,9 +3,6 @@ import json
 import math
 import pymeshlab
 
-#with open('config.json') as f:
-#    config = json.load(f)
-
 def mesh_processing(file_name, file_path, output_path):
     # Initialization
     # Check if gmsh is initialized
@@ -20,19 +17,19 @@ def mesh_processing(file_name, file_path, output_path):
     # create mesh surfaces using facet groups of 3
     #gmsh.model.mesh.createTopology()
     gmsh.model.mesh.classifySurfaces(1e-6)
-    print('Classified Surfaces\n')
+    #print('Classified Surfaces\n')
     gmsh.model.mesh.createGeometry()
-    print('Created Geometry')
+    #print('Created Geometry')
     # Determine bounding box
     xmin, ymin, zmin, xmax, ymax, zmax = gmsh.model.getBoundingBox(-1, -1)
 
     #####################################################
     surfaces = gmsh.model.getEntities(2)
-    print('Surfaces: ' + str(surfaces) + '\n')
+    #print('Surfaces: ' + str(surfaces) + '\n')
 
     # Create a surface loop from the entire structure
     surface_loop = gmsh.model.geo.addSurfaceLoop([s[1] for s in surfaces])
-    print('Surface Loop: ' + str(surface_loop) + '\n')
+    #print('Surface Loop: ' + str(surface_loop) + '\n')
 
     gmsh.model.geo.addVolume([surface_loop])
     gmsh.model.geo.synchronize()
@@ -56,7 +53,7 @@ def mesh_processing(file_name, file_path, output_path):
     gmsh.option.setNumber("Mesh.CharacteristicLengthMax", 50)
     #gmsh.option.setNumber("Mesh.SubdivisionAlgorithm", 2)
     gmsh.option.setNumber("Mesh.AngleToleranceFacetOverlap", 0.00001)
-    print('Meshing Parameters Set\n')
+    #print('Meshing Parameters Set\n')
     # Create 20-node hexahedrons
     #gmsh.option.setNumber("Mesh.ElementOrder", 2)
     #gmsh.option.setNumber("Mesh.SecondOrderIncomplete", 1)
@@ -69,16 +66,16 @@ def mesh_processing(file_name, file_path, output_path):
     lines = gmsh.model.getEntities(1)
     surfaces = gmsh.model.getEntities(2)
     volumes = gmsh.model.getEntities(3)
-    print(f'Top surfaces: {TABLE_TOP}\n')
-    print(f'Bottom surfaces: {LEG_BOTTOMS}\n')
+    #print(f'Top surfaces: {TABLE_TOP}\n')
+    #print(f'Bottom surfaces: {LEG_BOTTOMS}\n')
     #print('Points: ' + str(points))
-    print('Number of points: ' + str(len(points)) + '\n')
+    #print('Number of points: ' + str(len(points)) + '\n')
     #print('Lines: ' + str(lines))
-    print('Number of lines: ' + str(len(lines)) + '\n')
+    #print('Number of lines: ' + str(len(lines)) + '\n')
     #print('Surfaces: ' + str(surfaces))
-    print('Number of surfaces: ' + str(len(surfaces)) + '\n')
+    #print('Number of surfaces: ' + str(len(surfaces)) + '\n')
     #print('Volumes: ' + str(volumes))
-    print('Number of volumes: ' + str(len(volumes)) + '\n')
+    #print('Number of volumes: ' + str(len(volumes)) + '\n')
 
     #gmsh.option.setNumber("Mesh.SaveAll", 1)
     #gmsh.option.setNumber("Mesh.SaveGroupsOfElements", 1)
@@ -145,6 +142,7 @@ def repair_mesh(mesh_path, key, result_path, cellsize_p):
         ms.save_current_mesh(result_path + repaired_file)
         print("good")
     else:
+        pass
         print("bad")
     ms.clear()
 
