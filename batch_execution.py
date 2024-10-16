@@ -34,7 +34,7 @@ def write_to_log(stl_file, log_file, count, message):
         log.write(f"Count {count}, {stl_file} results:\n")
         log.write(message)
 
-def mp_subprocess(file, inpath, outpath, ERROR, message):
+def mp_subprocess(file, inpath, outpath, count, ERROR, message):
     t = 100
     try:
         start_time = time.time()  # Record the start time
@@ -74,51 +74,54 @@ def mp_subprocess(file, inpath, outpath, ERROR, message):
         #print("exception\n")
         return None
 
+def batch_execute(inpath, outpath, method, json_name):
+    count = 1
+    ERRORS = {}
+    files = get_files(inpath, method = method, json_name = json_name)
+    total = len(files)
+    print(f"Total number of files to process: {total}")
+    for file in files:
+        with open("trials.txt", "w") as log:
+            log.write(f"Total number of files: {total}\nStarted file number {count}, {file}.\n")
+        message = ""
+        file_start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + f".{int(time.time() % 1 * 1000):03d}"
+        message += f"MP s time: {file_start_time}\n"
+        result = mp_subprocess(file, inpath, outpath, count, ERRORS, message)
+        if result:
+            inp_file_path = outpath + file
+            inp_file_path = inp_file_path.replace(".stl", ".inp")
+            mi(inp_file_path)
+            inp_file_path = inp_file_path.replace(".inp", "")
+
+            command = "ccx " + inp_file_path
+
+            ccx_start_time = time.time()
+            with open(outpath + "_ccx_output.txt", "w") as outfile:
+                subprocess.run(f"{command} | tail -n 6", shell=True, stdout=outfile, stderr=outfile)
+            ccx_end_time = time.time()
+            ccx_execution_time = ccx_end_time - ccx_start_time
+
+            with open(outpath + "_ccx_output.txt", "r") as outfile:
+                output_lines = outfile.readlines()
+                if not "Job finished" in output_lines[-6]:
+                    ERRORS[file] = output_lines
+                    ccx_message = "Calculix\n" + "".join(output_lines) + f'\nCCX processing time: {ccx_execution_time}\n\n'
+                else:
+                    ccx_message = "Calculix analysis completed successfully." + f'\nCCX processing time: {ccx_execution_time}\n\n'
+
+            write_to_log(file, outpath + "log_job.txt", count, ccx_message)
+        count = count + 1
+
+    # Export ERRORS to a json file
+    with open(outpath + "list_error.json", "w") as list_error:
+        json.dump(ERRORS, list_error)
+
+
 ###################################################
 ###################################################
 ### Modify inpath, outpath, and method as needed ###
-inpath = "Thingi10K/raw_meshes/Batch2_results/"
-outpath = "Thingi10K/raw_meshes/Batch2_results/"
-method = "json" # "directory", "json", "custom"
-ERRORS = {}
-files = get_files(inpath, method = method, json_name = "list_success.json")
-
-count = 1
-total = len(files)
-print(f"Total number of files: {total}")
-for file in files:
-    with open("trials.txt", "w") as log:
-        log.write(f"Total number of files: {total}\nStarted file number {count}, {file}.\n")
-    message = ""
-    file_start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + f".{int(time.time() % 1 * 1000):03d}"
-    message += f"MP s time: {file_start_time}\n"
-    result = mp_subprocess(file, inpath, outpath, ERRORS, message)
-    if result:
-        inp_file_path = outpath + file
-        inp_file_path = inp_file_path.replace(".stl", ".inp")
-        mi(inp_file_path)
-        inp_file_path = inp_file_path.replace(".inp", "")
-
-        command = "ccx " + inp_file_path
-
-        ccx_start_time = time.time()
-        with open(outpath + "_ccx_output.txt", "w") as outfile:
-            subprocess.run(f"{command} | tail -n 6", shell=True, stdout=outfile, stderr=outfile)
-        ccx_end_time = time.time()
-        ccx_execution_time = ccx_end_time - ccx_start_time
-        
-        with open(outpath + "_ccx_output.txt", "r") as outfile:
-            output_lines = outfile.readlines()
-            if not "Job finished" in output_lines[-6]:
-                ERRORS[file] = output_lines
-                ccx_message = "Calculix\n" + "".join(output_lines) + f'\nCCX processing time: {ccx_execution_time}\n\n'
-            else:
-                ccx_message = "Calculix analysis completed successfully." + f'\nCCX processing time: {ccx_execution_time}\n\n'
-
-        write_to_log(file, outpath + "log_job.txt", count, ccx_message)
-    count = count + 1
-
-
-# Export ERRORS to a json file
-with open(outpath + "list_error.json", "w") as list_error:
-    json.dump(ERRORS, list_error)
+#inpath = "Thingi10K/raw_meshes/Batch2_results/"
+#outpath = "Thingi10K/raw_meshes/Batch2_results/"
+#method = "json" # "directory", "json", "custom"
+#json_name = "list_success.json"
+#batch_execute(inpath, outpath, method, json_name)

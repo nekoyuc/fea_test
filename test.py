@@ -9,7 +9,7 @@ import subprocess
 #file = "1452670.stl"
 file = "799439.stl"
 inpath = "Thingi10K/debug/"
-outpath = "Thingi10K/raw_meshes/Batch2_results/"
+outpath = "Thingi10K/raw_meshes/Batch4_results/"
 #mp(file, inpath, outpath)
 #mi(outpath + file.replace(".stl", ".inp"))
 
