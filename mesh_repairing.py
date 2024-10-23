@@ -18,7 +18,7 @@ def batch_repair(inpath, outpath, attempts_n, success_json = "list_success.json"
     for key in meshes.keys():
         file_start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + f".{int(time.time() % 1 * 1000):03d}"
         with open(outpath + "log_repair.txt", "a") as job_log:
-            job_log.write(f"\nCount {count}. Mesh {key} repair started.\nRepair start time: {file_start_time}.\n")
+            job_log.write(f"\nCount {count}. Mesh {key} repair started.\nRepair s time: {file_start_time}.\n")
         
         for i in range(attempts_n):
             cellsize_p = 1.5 + i * 0.25
@@ -34,14 +34,14 @@ def batch_repair(inpath, outpath, attempts_n, success_json = "list_success.json"
             if result.stdout == "good\n":
                 file_end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + f".{int(time.time() % 1 * 1000):03d}"
                 with open(outpath + "log_repair.txt", "a") as job_log:
-                    job_log.write(f"Mesh {key} repaired successfully at attempt {i + 1}.\nRepair end time: {file_end_time}.\n\n")
+                    job_log.write(f"Success. Attempt {i + 1}.\nRepair e time: {file_end_time}.\n\n")
                 repaired_file = key.replace(".stl", "_repaired.stl")
                 SUCCESS[repaired_file] = cellsize_p
                 break
             else:
                 file_end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + f".{int(time.time() % 1 * 1000):03d}"
                 with open(outpath + "log_repair.txt", "a") as job_log:
-                    job_log.write(f"Attempt {i + 1} failed for mesh {key}.\nRepair end time: {file_end_time}.\n\n")
+                    job_log.write(f"Attempt {i + 1} failed for mesh {key}.\nRepair e time: {file_end_time}.\n\n")
                 if i == attempts_n - 1:
                     FAILURE[key] = cellsize_p
         

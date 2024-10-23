@@ -2,8 +2,8 @@ from batch_execution import batch_execute
 from mesh_repairing import batch_repair
 import time
 
-inpath = "Thingi10K/raw_meshes/Batch6/"
-outpath = "Thingi10K/raw_meshes/Batch6_results/"
+inpath = "Thingi10K/raw_meshes/Batch35/"
+outpath = "Thingi10K/raw_meshes/Batch35_results/"
 method1 = "directory" # "directory", "json", "custom"
 method2 = "json" # "directory", "json", "custom"
 json_name = "list_success.json"
